@@ -1,0 +1,75 @@
+# ---------------------------------------------------------------------------
+# Keel framework configuration
+# ---------------------------------------------------------------------------
+# Copy this file to `framework.config.yaml` and edit. The installer substitutes
+# every {{TOKEN}} in the bundled templates with the values below.
+#
+# Anything you leave at its default is fine — you can re-run the installer after
+# changing values (it diffs, it does not blindly overwrite your local edits).
+# ---------------------------------------------------------------------------
+
+# --- Identity -------------------------------------------------------------
+org:            "Acme Corp"            # {{ORG}}  — your company / org name
+project:        "Atlas"               # {{PROJECT}} — the product/repo this governs
+framework_name: "Keel"                # {{FRAMEWORK_NAME}} — rename the framework if you like
+default_branch: "main"                # {{DEFAULT_BRANCH}}
+
+# --- Agentic tool ---------------------------------------------------------
+# The enforcement adapter shipped in v1 targets Claude Code. If you use a
+# different agentic tool, the hooks document the contract they rely on
+# (stdin JSON event, exit-code-2-to-block) so they can be re-homed.
+agentic_tool:   "Claude Code"         # {{AGENTIC_TOOL}}
+
+# --- Architecture model ---------------------------------------------------
+# Keel is boundary-agnostic but assumes you HAVE explicit boundaries. Describe
+# yours. SAIL used five "planes"; yours might be services, bounded contexts,
+# layers, or modules. The boundary hook enforces whatever you list here.
+architecture:
+  boundary_term:  "module"            # {{BOUNDARY_TERM}} — what you call a top-level boundary
+  boundaries:                          # {{BOUNDARIES}} — the allowed list
+    - "ingest"
+    - "core"
+    - "api"
+    - "ui"
+    - "platform"
+  # Code in one boundary must not import another boundary's internals
+  # (shared/platform utilities excepted). The architecture-drift hook + the
+  # adapter's boundary tests enforce this.
+  shared_boundary: "platform"          # {{SHARED_BOUNDARY}} — the only cross-importable one
+
+# --- Identifiers ----------------------------------------------------------
+# Work-item ID scheme. Keep it greppable and unique.
+feature_id_pattern: "{{PROJECT}}-{AREA}-{NNN}"   # e.g. ATLAS-API-001
+
+# --- Autonomy tiers -------------------------------------------------------
+# Confidence thresholds at which the agent may act without a human. Tune to
+# your team's risk appetite. See core/constitution/autonomy-tiers.md.
+autonomy:
+  tier1_auto_approve_min: 0.85        # >= this: act autonomously
+  tier2_batch_min:        0.70        # batch human review (hours)
+  tier3_async_min:        0.50        # async same-day approval
+  # < tier3_async_min OR a Tier-4 trigger: synchronous human block
+  approvers:
+    - "Lead Engineer"                 # {{APPROVERS}}
+    - "Repo Owner"
+
+# --- Stack adapters to install -------------------------------------------
+# Set true for the adapters you want stamped into the target repo.
+adapters:
+  java_spring:     false
+  node_typescript: false
+  python:          false
+
+# --- Enforcement rollout --------------------------------------------------
+# Phased rollout avoids dropping every hook on a team at once. The installer
+# writes ALL hooks but registers only the phase you select in settings.json.
+# Advance phases as the team internalizes each tier. See IMPLEMENTATION_GUIDE.md.
+enforcement_phase: 1                   # 1 = tracking-only, 2 = soft gates, 3 = full blocking
+
+# --- File-length guardrail ------------------------------------------------
+max_file_lines: 600                    # {{MAX_FILE_LINES}} — soft cap the length hook warns/blocks on
+
+# --- Knowledge & decisions ------------------------------------------------
+adr_dir:       "docs/decisions"        # {{ADR_DIR}}
+knowledge_dir: "docs/knowledge/notes"  # {{KNOWLEDGE_DIR}}
+standards_dir: "docs/standards"        # {{STANDARDS_DIR}}

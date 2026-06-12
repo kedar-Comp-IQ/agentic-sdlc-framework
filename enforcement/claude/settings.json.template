@@ -1,0 +1,43 @@
+{
+  "//": "Keel hook registration for Claude Code. All hooks are registered; each grades its own behavior (track/warn/block) from KEEL_ENFORCEMENT_PHASE in .claude/hooks/lib/keel.env. Advance the phase there — no need to edit this file.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/verify-single-session.sh" }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/verify-spec.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-impact-analysis.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-interface-stability.sh" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/check-file-length.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-architecture-drift.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-single-session.sh" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "bash .claude/hooks/verify-status-claim.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-api-contract.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-review-approval.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-delivery.sh" },
+          { "type": "command", "command": "bash .claude/hooks/verify-single-session.sh" }
+        ]
+      }
+    ]
+  }
+}

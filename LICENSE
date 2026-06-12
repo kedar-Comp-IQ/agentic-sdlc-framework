@@ -1,0 +1,65 @@
+JusTransform Internal Use License
+=================================
+
+Copyright (c) 2026 JusTransform Ltd. All rights reserved.
+
+This software and its accompanying documentation (the "Framework") are the
+confidential and proprietary intellectual property of JusTransform Ltd.
+("JusTransform"). The Framework is made available for internal use within
+JusTransform and its affiliated entities, teams, and authorized contractors
+(collectively, "Internal Users").
+
+1. GRANT OF LICENSE
+   Subject to the terms below, JusTransform grants Internal Users a
+   non-exclusive, non-transferable, royalty-free right to:
+   (a) use, copy, and deploy the Framework within JusTransform projects and
+       repositories;
+   (b) modify, adapt, and create derivative works of the Framework for the
+       purpose of governing JusTransform software delivery; and
+   (c) distribute the Framework and such derivative works to other Internal
+       Users.
+
+2. RESTRICTIONS
+   Internal Users shall NOT, without the prior written authorization of
+   JusTransform:
+   (a) distribute, publish, sublicense, sell, or otherwise make the Framework
+       (in whole or in part, modified or unmodified) available to any party
+       that is not an Internal User;
+   (b) remove or alter this license, the copyright notice, or any proprietary
+       markings;
+   (c) use the Framework, or the name "JusTransform", to endorse or promote
+       products outside JusTransform without permission; or
+   (d) open-source the Framework or contribute it to any external repository.
+
+3. CONTRIBUTIONS
+   Contributions made by Internal Users to the Framework are assigned to and
+   become the property of JusTransform, and are licensed back to Internal Users
+   under the terms of this license. See CONTRIBUTING.md.
+
+4. THIRD-PARTY COMPONENTS
+   The Framework references third-party tools (e.g. linters, scanners, test
+   frameworks) via configuration and documentation but does not redistribute
+   them. Each such tool remains governed by its own license; Internal Users are
+   responsible for complying with those licenses when installing the tools.
+
+5. NO WARRANTY
+   THE FRAMEWORK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. THE FRAMEWORK ENFORCES
+   PROCESS; IT DOES NOT GUARANTEE THE CORRECTNESS, SECURITY, OR COMPLIANCE OF
+   ANY SOFTWARE TO WHICH IT IS APPLIED.
+
+6. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL JUSTRANSFORM BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY ARISING FROM OR IN CONNECTION WITH THE FRAMEWORK OR ITS USE.
+
+7. TERMINATION
+   The rights granted herein terminate automatically if an Internal User
+   breaches this license or ceases to be an Internal User.
+
+---
+If JusTransform later elects to release this Framework externally, this file
+will be replaced with the applicable open-source license (e.g. Apache-2.0 or
+MIT). Until then, the terms above govern all use.
+
+For licensing questions, contact the JusTransform platform team.

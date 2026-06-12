@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keel — Control Coverage Matrix</title>
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--steel:#3a6ea5;--ice:#eef4fb;--accent:#1d9a6c;
+--warn:#c9821a;--block:#c0392b;--ink:#1a2430;--mut:#5b6b7b;--line:#dbe4ee;--bg:#f5f8fc;--card:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
+code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:#eaf0f7;padding:.12em .4em;border-radius:4px}
+pre{background:#071a33;color:#cfe3d6;border:1px solid #1f3a5f;border-radius:10px;padding:16px 18px;overflow:auto;font-size:13.5px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit;font-size:13.5px}
+.topnav{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;display:flex;align-items:center;gap:18px;padding:0 22px;height:54px;box-shadow:0 1px 6px rgba(11,37,69,.25);flex-wrap:wrap}
+.topnav .brand{color:#fff;font-weight:800;font-size:18px;letter-spacing:-.3px}
+.topnav .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+.topnav .navlinks a{color:#cfe0f3;padding:6px 12px;border-radius:7px;font-size:14px}
+.topnav .navlinks a:hover{background:rgba(255,255,255,.1);text-decoration:none}
+.topnav .navlinks a.active{background:var(--steel);color:#fff}
+.doc{max-width:880px;margin:0 auto;padding:38px 24px 80px}
+.doc h1{font-size:34px;letter-spacing:-.6px;margin:.2em 0 .5em;padding-bottom:.25em;border-bottom:2px solid var(--line)}
+.doc h2{font-size:25px;letter-spacing:-.3px;margin:1.6em 0 .5em;padding-bottom:.2em;border-bottom:1px solid var(--line)}
+.doc h3{font-size:19px;margin:1.4em 0 .4em}
+.doc h4{font-size:16px;margin:1.2em 0 .3em;color:var(--navy2)}
+.doc p{margin:.7em 0}
+.doc ul,.doc ol{margin:.5em 0 .9em;padding-left:1.5em}
+.doc li{margin:.28em 0}
+.doc li.task{list-style:none;margin-left:-1.3em}
+.doc blockquote{margin:1em 0;padding:.6em 1.1em;border-left:4px solid var(--steel);background:var(--ice);border-radius:0 8px 8px 0;color:var(--navy2)}
+.doc blockquote p{margin:.3em 0}
+.doc hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+.doc table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px;margin:1.1em 0;display:block;overflow-x:auto}
+.doc th,.doc td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+.doc th{background:var(--ice);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--navy2);white-space:nowrap}
+.doc tr:last-child td{border-bottom:none}
+.doc strong{color:var(--ink)}
+.gen-note{max-width:880px;margin:0 auto;padding:10px 24px 0;color:var(--mut);font-size:12.5px}
+</style></head><body>
+<nav class="topnav"><a class="brand" href="index.html">⚓ Keel</a><div class="navlinks"><a href="index.html">Overview</a><a href="readme.html">README</a><a href="implementation-guide.html">Implementation Guide</a><a href="coverage-matrix.html" class="active">Coverage Matrix</a></div></nav>
+<p class="gen-note">Generated from Markdown by <code>tools/build-site.py</code> — do not hand-edit; edit the source <code>.md</code> and rebuild.</p>
+<article class="doc">
+<h1 id="control-coverage-matrix">Control Coverage Matrix</h1>
+<p>The single map of <strong>every governance control → the mechanism that enforces it → where it runs</strong>. This is the document that answers &quot;is this rule actually enforced, or just written down?&quot; — and exposes the gaps honestly.</p>
+<p>A control with no mechanism is <strong>ASPIRATIONAL</strong>: real intent, no teeth. That&#x27;s fine as a stated, visible state; what&#x27;s not fine is <em>believing</em> something is enforced when it isn&#x27;t.</p>
+<p>Legend — <strong>Where:</strong> <code>in-session</code> (agent hook, blocks the action) · <code>commit</code> (git hook) · <code>CI</code> (server-side) · <code>review</code> (human/Quality gate).</p>
+<table><thead><tr><th>Control</th><th>Source</th><th>Mechanism</th><th>Where</th><th>Blocks?</th></tr></thead><tbody><tr><td>Spec exists before implementation (IR-03)</td><td>constitution</td><td><code>verify-spec</code> hook</td><td>in-session</td><td>yes</td></tr><tr><td>Work-item ID present &amp; unique (IR-02)</td><td>constitution</td><td><code>verify-spec</code> hook + CI</td><td>in-session, CI</td><td>yes</td></tr><tr><td>Boundary isolation (IR-01, IR-12)</td><td>constitution</td><td><code>verify-architecture-drift</code> + adapter boundary tests</td><td>in-session, CI</td><td>yes</td></tr><tr><td>Cross-{{BOUNDARY_TERM}} change flagged (IR-05)</td><td>constitution</td><td><code>verify-cross-module-changes</code> hook</td><td>in-session</td><td>warns/blocks</td></tr><tr><td>API contract stability (IR-04, IR-14)</td><td>constitution</td><td><code>verify-api-contract</code> hook + review</td><td>in-session, review</td><td>yes (Tier 4)</td></tr><tr><td>Frozen interface unchanged (IR-22)</td><td>constitution</td><td><code>verify-interface-stability</code> hook</td><td>in-session</td><td>yes (Tier 4)</td></tr><tr><td>Parameterized queries (IR-10)</td><td>constitution</td><td>SAST adapter</td><td>CI</td><td>yes</td></tr><tr><td>Secrets not in source (IR-19)</td><td>constitution</td><td>secret-scan hook + CI</td><td>commit, CI</td><td>yes</td></tr><tr><td>AI absent from runtime path (IR-21)</td><td>constitution</td><td>CI grep + <code>verify-ai-surface-stability</code></td><td>in-session, CI</td><td>yes</td></tr><tr><td>No mutable global state (IR-07)</td><td>constitution</td><td>SAST/lint + review</td><td>CI, review</td><td>yes</td></tr><tr><td>Audit trail on mutations (IR-08)</td><td>constitution</td><td>review gate + tests</td><td>review</td><td>yes</td></tr><tr><td>Tenant isolation (IR-06)</td><td>constitution</td><td>review gate + isolation tests</td><td>review, CI</td><td>yes (Tier 4)</td></tr><tr><td>Delivery record at close (IR-20 / DoD)</td><td>process</td><td><code>verify-delivery</code> hook (Stop)</td><td>in-session</td><td>yes</td></tr><tr><td>Knowledge captured (IR-20)</td><td>process</td><td><code>verify-delivery</code> hook (Stop)</td><td>in-session</td><td>yes</td></tr><tr><td>No &quot;done&quot; without evidence</td><td>quality</td><td><code>verify-status-claim</code> hook</td><td>in-session</td><td>yes</td></tr><tr><td>File length under cap</td><td>quality</td><td><code>check-file-length</code> hook</td><td>in-session</td><td>warns/blocks</td></tr><tr><td>Impact analysis for fixes</td><td>process</td><td><code>verify-impact-analysis</code> hook</td><td>in-session</td><td>yes</td></tr><tr><td>One session per checkout</td><td>process</td><td><code>verify-single-session</code> hook</td><td>in-session</td><td>yes</td></tr><tr><td>Security review on changed surfaces</td><td>security</td><td><code>verify-security-review</code> hook + Quality</td><td>in-session, review</td><td>yes</td></tr><tr><td>Governance-recursive change debated</td><td>governance</td><td><code>verify-review-approval</code> (debate) hook</td><td>in-session</td><td>yes</td></tr><tr><td>Tier-4 change has approver sign-off</td><td>governance</td><td>review gate</td><td>review</td><td>yes</td></tr><tr><td>Dependency CVEs (≥9.0) blocked</td><td>security</td><td>dependency-scan adapter</td><td>CI</td><td>yes</td></tr><tr><td>License compliance</td><td>security</td><td>license-check adapter</td><td>CI</td><td>yes</td></tr><tr><td>Coverage threshold met</td><td>quality</td><td>coverage adapter</td><td>CI</td><td>yes</td></tr><tr><td>Source-of-truth drift</td><td>quality</td><td>drift workflow + render check</td><td>CI</td><td>warns</td></tr><tr><td>Deletion has rationale</td><td>quality</td><td><code>verify-deletion-rationale</code> hook</td><td>in-session</td><td>warns</td></tr><tr><td>E2E results present for route changes</td><td>quality</td><td><code>verify-e2e-results</code> hook</td><td>in-session</td><td>yes</td></tr></tbody></table>
+<blockquote><p>The hook names above correspond to the generalized hooks in <code>enforcement/claude/hooks/</code>. Ten ship in v1 (spec, impact-analysis, interface-stability, file-length, architecture-drift, single-session, status-claim, api-contract, review-approval, delivery); the remaining rows are enforced by CI/review or documented in <code>enforcement/hook-coverage-matrix.md</code> as the natural expansion set.</p></blockquote>
+<h2 id="how-to-use-this-matrix">How to use this matrix</h2>
+<ol><li><strong>Adoption:</strong> decide which rows you want <em>on day one</em> vs. later (phased rollout — see <code>IMPLEMENTATION_GUIDE.md</code>). Turn rows on by registering the hook / adding the CI job.</li><li><strong>Audit:</strong> quarterly, walk the matrix and confirm each &quot;yes&quot; still blocks. Hooks rot; a hook that exits 0 unconditionally is worse than no hook (false assurance).</li><li><strong>Gap-filling:</strong> every ASPIRATIONAL row is a backlog item. Every incident that slipped through is a question of which row was missing or toothless.</li></ol>
+<h2 id="the-honesty-principle">The honesty principle</h2>
+<p>This matrix is deliberately the place where the framework admits what it <em>doesn&#x27;t</em> yet enforce. A governance system that overstates its own coverage is more dangerous than one that&#x27;s modest about it — because people trust green. Keep this document truthful even when the truth is &quot;review only, no mechanism yet.&quot;</p>
+</article></body></html>

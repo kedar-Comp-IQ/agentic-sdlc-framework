@@ -1,0 +1,76 @@
+# {{PROJECT}} — Governance (read this first)
+
+> This repository runs under the **{{FRAMEWORK_NAME}}** agentic-SDLC governance framework.
+> Before doing any work, read this file. It is the master governance document; the full
+> framework lives under `.keel/`. Enforcement hooks under `.claude/hooks/` will block
+> non-compliant actions — they are not advisory.
+
+## Identity
+
+- **Org / Project:** {{ORG}} / {{PROJECT}}
+- **Agentic tool:** {{AGENTIC_TOOL}}
+- **Default branch:** {{DEFAULT_BRANCH}}
+- **Architecture:** {{BOUNDARY_TERM}}-based — {{BOUNDARIES}} (shared: `{{SHARED_BOUNDARY}}`)
+- **Work-item ID pattern:** `{{FEATURE_ID_PATTERN}}`
+
+## The non-negotiables (start here)
+
+1. **Inviolable rules** — `.keel/core/constitution/inviolable-rules.md`. These are
+   mechanically enforced. Violating one blocks the action.
+2. **Autonomy tiers** — `.keel/core/constitution/autonomy-tiers.md`. Tier-4 changes
+   (schema drops, auth, breaking APIs, cross-{{BOUNDARY_TERM}} changes, frozen interfaces,
+   constitution edits) **always** block on a human, regardless of confidence.
+3. **Quality + security principles** — `.keel/core/constitution/`.
+
+## Every piece of work passes the SDLC gate
+
+`.keel/core/process/sdlc-gate.md`:
+
+1. **Classify** the work (`task-classification.md`).
+2. **Plan** — Features need an approved **spec**; Bug/Debt/Security need a **quick plan**
+   with impact analysis. (The `verify-spec` / `verify-impact-analysis` hooks enforce this.)
+3. **Implement** against the constitution + the stack standards; self-review before
+   declaring done.
+4. **Deliver** — write a delivery record (`verify-delivery` hook checks it at close).
+5. **Capture** knowledge for every non-obvious lesson (IR-20).
+
+## Session discipline
+
+- **One session per checkout.** Never run two agent sessions in one working tree — spin a
+  separate worktree. (`verify-single-session` hook enforces this.)
+- **Stay in your archetype.** A Plan session plans; a Build session builds; a Quality
+  session is the *independent* verification — it doesn't self-approve its own Build.
+  (`.keel/core/process/session-archetypes.md`.)
+- **Governance-recursive changes get adversarial review.** Editing an inviolable rule, a
+  hook, or this file requires an independent Critic + Judge debate transcript before close.
+  (`verify-review-approval` hook; `.keel/core/governance/review-framework.md`.)
+
+## Bash & tooling conventions
+
+- One command per call; don't chain with `&&`/`||`/`;` (the permission model matches on
+  command prefix).
+- Prefer dedicated file/search tools over shell `cat`/`grep`/`find`.
+- Verify the git identity expected for this repo before committing.
+
+## Standards (stack-specific)
+
+The coding / API / testing / migration standards for this repo's stack live in
+`.keel/adapters/<stack>/` and/or `{{STANDARDS_DIR}}/`. Follow them; the architecture and
+security gates check against them.
+
+## Where things live
+
+| What | Where |
+|------|-------|
+| Constitution (rules, tiers, principles) | `.keel/core/constitution/` |
+| Process (gate, archetypes, classification, DoR/DoD, waivers) | `.keel/core/process/` |
+| Governance (ADR, review, knowledge, tiers, coverage) | `.keel/core/governance/` |
+| Templates (ADR, spec, quick-plan, delivery, KN) | `.keel/core/templates/` |
+| ADRs | `{{ADR_DIR}}/` |
+| Knowledge notes | `{{KNOWLEDGE_DIR}}/` |
+| Hooks (the teeth) | `.claude/hooks/` |
+| Rollout phase / hook config | `.claude/hooks/lib/keel.env` |
+
+---
+*Governed by {{FRAMEWORK_NAME}}. Enforcement phase is set in `.claude/hooks/lib/keel.env`
+(currently phase {{ENFORCEMENT_PHASE}}: 1=tracking, 2=soft, 3=enforcing).*

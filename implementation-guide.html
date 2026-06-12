@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keel — Implementation Guide</title>
+<style>
+:root{--navy:#0b2545;--navy2:#13315c;--steel:#3a6ea5;--ice:#eef4fb;--accent:#1d9a6c;
+--warn:#c9821a;--block:#c0392b;--ink:#1a2430;--mut:#5b6b7b;--line:#dbe4ee;--bg:#f5f8fc;--card:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+a{color:var(--steel);text-decoration:none}a:hover{text-decoration:underline}
+code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:#eaf0f7;padding:.12em .4em;border-radius:4px}
+pre{background:#071a33;color:#cfe3d6;border:1px solid #1f3a5f;border-radius:10px;padding:16px 18px;overflow:auto;font-size:13.5px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit;font-size:13.5px}
+.topnav{position:sticky;top:0;z-index:10;background:var(--navy);color:#fff;display:flex;align-items:center;gap:18px;padding:0 22px;height:54px;box-shadow:0 1px 6px rgba(11,37,69,.25);flex-wrap:wrap}
+.topnav .brand{color:#fff;font-weight:800;font-size:18px;letter-spacing:-.3px}
+.topnav .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+.topnav .navlinks a{color:#cfe0f3;padding:6px 12px;border-radius:7px;font-size:14px}
+.topnav .navlinks a:hover{background:rgba(255,255,255,.1);text-decoration:none}
+.topnav .navlinks a.active{background:var(--steel);color:#fff}
+.doc{max-width:880px;margin:0 auto;padding:38px 24px 80px}
+.doc h1{font-size:34px;letter-spacing:-.6px;margin:.2em 0 .5em;padding-bottom:.25em;border-bottom:2px solid var(--line)}
+.doc h2{font-size:25px;letter-spacing:-.3px;margin:1.6em 0 .5em;padding-bottom:.2em;border-bottom:1px solid var(--line)}
+.doc h3{font-size:19px;margin:1.4em 0 .4em}
+.doc h4{font-size:16px;margin:1.2em 0 .3em;color:var(--navy2)}
+.doc p{margin:.7em 0}
+.doc ul,.doc ol{margin:.5em 0 .9em;padding-left:1.5em}
+.doc li{margin:.28em 0}
+.doc li.task{list-style:none;margin-left:-1.3em}
+.doc blockquote{margin:1em 0;padding:.6em 1.1em;border-left:4px solid var(--steel);background:var(--ice);border-radius:0 8px 8px 0;color:var(--navy2)}
+.doc blockquote p{margin:.3em 0}
+.doc hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+.doc table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px;margin:1.1em 0;display:block;overflow-x:auto}
+.doc th,.doc td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+.doc th{background:var(--ice);font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--navy2);white-space:nowrap}
+.doc tr:last-child td{border-bottom:none}
+.doc strong{color:var(--ink)}
+.gen-note{max-width:880px;margin:0 auto;padding:10px 24px 0;color:var(--mut);font-size:12.5px}
+</style></head><body>
+<nav class="topnav"><a class="brand" href="index.html">⚓ Keel</a><div class="navlinks"><a href="index.html">Overview</a><a href="readme.html">README</a><a href="implementation-guide.html" class="active">Implementation Guide</a><a href="coverage-matrix.html">Coverage Matrix</a></div></nav>
+<p class="gen-note">Generated from Markdown by <code>tools/build-site.py</code> — do not hand-edit; edit the source <code>.md</code> and rebuild.</p>
+<article class="doc">
+<h1 id="keel-implementation-guide">Keel — Implementation Guide</h1>
+<p>How to adopt {{FRAMEWORK_NAME}} in a repository, tune it to your team, and operate it over time. Read <code>README.md</code> first for the mental model; this is the <em>how</em>.</p>
+<p>The golden rule of adoption: <strong>roll out enforcement in phases.</strong> A team that gets 24 blocking gates on day one will route around them. A team that sees the gates <em>track</em> for a week, then <em>warn</em> for a week, then <em>block</em>, internalizes them. The framework is built for this — every hook grades its own behavior from a single config line.</p>
+<hr>
+<h2 id="part-1-install-30-minutes">Part 1 — Install (30 minutes)</h2>
+<h3 id="11-prerequisites">1.1 Prerequisites</h3>
+<ul><li><code>bash</code> + <code>python3</code> (installer and hooks; no third-party Python packages).</li><li>Git. If using the Claude Code adapter: Claude Code.</li><li>Your target repo, on a feature branch (don&#x27;t install onto <code>{{DEFAULT_BRANCH}}</code> directly).</li></ul>
+<h3 id="12-configure">1.2 Configure</h3>
+<pre><code>cp framework.config.example.yaml framework.config.yaml
+$EDITOR framework.config.yaml</code></pre>
+<p>Set, at minimum:</p>
+<ul><li><code>org</code>, <code>project</code>, <code>default_branch</code></li><li><code>architecture.boundaries</code> + <code>architecture.shared_boundary</code> — <strong>your</strong> boundaries (services, bounded contexts, layers, modules — whatever you call them). This is the most important config: the boundary rule (IR-01) and several hooks key off it.</li><li><code>adapters.*</code> — set <code>true</code> for the stacks you use.</li><li><code>enforcement_phase: 1</code> — <strong>start at tracking.</strong> Always.</li></ul>
+<h3 id="13-dry-run-then-install">1.3 Dry-run, then install</h3>
+<pre><code>bash install.sh --target /path/to/repo --config framework.config.yaml --dry-run   # preview
+bash install.sh --target /path/to/repo --config framework.config.yaml             # write</code></pre>
+<p>The installer stamps tokens, writes the core to <code>.keel/</code>, the hooks to <code>.claude/</code>, the selected adapters, and the CI workflow. It <strong>never</strong> overwrites a file you&#x27;ve customized without <code>--force</code> (it reports conflicts instead).</p>
+<h3 id="14-verify-it-landed">1.4 Verify it landed</h3>
+<pre><code>cd /path/to/repo
+cat .claude/CLAUDE.md                 # your stamped master governance doc
+cat .claude/hooks/lib/keel.env        # phase = 1
+ls  .claude/hooks/                    # the verify-*.sh set
+ls  .keel/core/                       # constitution / process / governance / templates</code></pre>
+<p>Commit this as one reviewable PR titled &quot;Adopt {{FRAMEWORK_NAME}} governance (phase 1: tracking)&quot;.</p>
+<hr>
+<h2 id="part-2-the-phased-rollout-46-weeks">Part 2 — The phased rollout (4–6 weeks)</h2>
+<p>Advance by editing <strong>one line</strong> in <code>.claude/hooks/lib/keel.env</code> (<code>KEEL_ENFORCEMENT_PHASE</code>). No reinstall.</p>
+<h3 id="phase-1-tracking-week-1">Phase 1 — Tracking (week 1)</h3>
+<p>Hooks log <code>[keel:track …]</code> and never block. Goal: <strong>make the gates visible and tune the heuristics.</strong> Run your normal work; watch which hooks fire and whether they fire correctly. Tune the repo-specific bits (see Part 3) until the tracking output matches reality — false positives now are free; false positives at phase 3 are friction.</p>
+<p><strong>Exit criteria:</strong> tracking output is accurate; the team has seen the gates.</p>
+<h3 id="phase-2-soft-gates-weeks-23">Phase 2 — Soft gates (weeks 2–3)</h3>
+<p>Hooks warn loudly (<code>[keel:WARN …]</code>) but still allow. Goal: <strong>build the habit.</strong> People start producing specs, delivery records, and knowledge notes because they&#x27;re being reminded every time they skip one — without being blocked. Measure how often each gate would have blocked; a gate that never fires is either perfectly internalized or mis-tuned.</p>
+<p><strong>Exit criteria:</strong> warnings are rare because the habits formed, not because the gates are broken.</p>
+<h3 id="phase-3-enforcing-week-4">Phase 3 — Enforcing (week 4+)</h3>
+<p>Hooks block (exit 2). Goal: <strong>guarantee.</strong> Now the discipline is structural. Turn on the CI backstop (Part 4) and make it a required check so bypassed hooks still get caught.</p>
+<blockquote><p>You don&#x27;t have to advance all hooks together. If one hook&#x27;s heuristic is still noisy, keep the global phase lower and graduate the rest by trimming that hook, or split keel.env reads per-hook. Pragmatism over purity.</p></blockquote>
+<hr>
+<h2 id="part-3-tuning-to-your-team-the-expected-work">Part 3 — Tuning to your team (the expected work)</h2>
+<p>The framework is a <em>starter</em>, not a straitjacket. Expect to tune:</p>
+<h3 id="31-the-constitution">3.1 The constitution</h3>
+<ul><li><strong>Inviolable rules</strong> (<code>.keel/core/constitution/inviolable-rules.md</code>): keep what applies, delete what doesn&#x27;t, add yours via the template. <strong>Single-tenant?</strong> Delete IR-06. <strong>No &quot;no-AI-in-runtime&quot; constraint?</strong> Delete IR-21. Aim for a set the team can recite (≤ 25).</li><li><strong>Autonomy tiers</strong>: set the confidence thresholds and the Tier-4 trigger list to your risk appetite (<code>framework.config.yaml</code> + <code>autonomy-tiers.md</code>).</li></ul>
+<h3 id="32-the-hooks-the-lines-that-need-your-repos-specifics">3.2 The hooks (the lines that need your repo&#x27;s specifics)</h3>
+<p>Each hook is commented at its tuning points. The usual edits:</p>
+<ul><li><code>verify-spec.sh</code> / <code>verify-impact-analysis.sh</code>: the <strong>source-path globs</strong> (what counts as production code), the <strong>spec/plan locations</strong> it greps, and the <strong>work-item ID regex</strong> (match your <code>{{FEATURE_ID_PATTERN}}</code>).</li><li><code>verify-delivery.sh</code>: where delivery records and knowledge notes live.</li><li><code>verify-review-approval.sh</code>: <code>KEEL_GOVERNANCE_GLOBS</code> (which paths are governance-recursive) and the debate-transcript directory.</li><li><code>verify-status-claim.sh</code>: the test-command patterns for your stack.</li><li><code>check-file-length.sh</code>: <code>KEEL_MAX_FILE_LINES</code>.</li></ul>
+<p>After editing a hook, smoke-test it (see <code>examples/</code>): feed it a known violation and confirm it tracks/warns/blocks as expected. <strong>A hook that silently passes is worse than no hook.</strong></p>
+<h3 id="33-the-adapters">3.3 The adapters</h3>
+<ul><li>Keep only the stacks you use. Set coverage / mutation / CVE thresholds to match the constitution (translate the bar, don&#x27;t lower it).</li><li>The single most important adapter piece is the <strong>boundary test</strong> (ArchUnit / eslint-boundaries / import-linter) — it&#x27;s how IR-01 becomes mechanical in your language. Get that wired before phase 3.</li></ul>
+<h3 id="34-source-of-truth-dashboards-optional-but-high-value">3.4 Source-of-truth &amp; dashboards (optional but high-value)</h3>
+<p>If you adopt the &quot;one machine-readable source, everything else rendered&quot; pattern (quality §6), put your state in one file and generate plans/dashboards from it. Add a CI freshness check so a stale render fails the build. (This is what keeps governance docs from drifting into fiction.)</p>
+<hr>
+<h2 id="part-4-wire-the-ci-backstop">Part 4 — Wire the CI backstop</h2>
+<ol><li>Copy <code>.keel/ci/governance-verify.yml</code> → <code>.github/workflows/governance-verify.yml</code> (adapt for GitLab/Azure if needed).</li><li>Copy the adapter CI snippet(s) from <code>.keel/adapters/&lt;stack&gt;/README.md</code> → <code>.github/workflows/&lt;stack&gt;-verify.yml</code> and uncomment the matching job in <code>governance-verify.yml</code>.</li><li>In branch protection: make <code>governance-verify</code> (and the adapter verify jobs) <strong>required status checks</strong>, and enable <strong>&quot;require branches up to date before merge.&quot;</strong> This is the hard gate that closes the loop on bypassed hooks — the merge button stays greyed out until the checks pass.</li></ol>
+<hr>
+<h2 id="part-5-operating-it-ongoing">Part 5 — Operating it (ongoing)</h2>
+<ul><li><strong>Run an Ops session on a cadence</strong> (<code>session-archetypes.md</code> → Ops): dependency freshness, drift, flaky tests, expired waivers. It dispatches findings; it doesn&#x27;t fix them inline.</li><li><strong>Every incident hardens the framework</strong> (<code>waivers-and-incidents.md</code>): the post-mortem&#x27;s output is a new rule / hook / Tier-4 trigger, not just a fix. This is how the constitution becomes the compiled memory of what&#x27;s bitten you.</li><li><strong>Audit the coverage matrix quarterly</strong> (<code>control-coverage-matrix.md</code>): confirm each &quot;yes&quot; still blocks by running each hook against a known violation. Hooks rot silently.</li><li><strong>Keep knowledge capture alive</strong>: it&#x27;s the cheapest high-value habit and the one most likely to lapse. The delivery hook checks for it; don&#x27;t let &quot;no new knowledge&quot; become a reflex that hides real lessons.</li></ul>
+<hr>
+<h2 id="part-6-upgrading-keel">Part 6 — Upgrading Keel</h2>
+<p>Local tweaks live in your repo; framework upgrades are a diff you review, never a blind overwrite:</p>
+<pre><code># pull a newer framework version, then:
+bash install.sh --target /path/to/repo --config framework.config.yaml --dry-run</code></pre>
+<p>The dry-run reports which bundled files changed and which of yours conflict (you&#x27;ve edited them). Merge the upstream improvements you want by hand; skip the ones that fight your customizations. Pin the framework <code>VERSION</code> you&#x27;re on in your repo so the diff is meaningful.</p>
+<hr>
+<h2 id="part-7-anti-patterns-how-adoptions-fail">Part 7 — Anti-patterns (how adoptions fail)</h2>
+<ul><li><strong>Big-bang enforcement.</strong> Phase 3 on day one → <code>--no-verify</code> everywhere. Always phase in.</li><li><strong>Hooks that pass silently.</strong> A mis-tuned glob that stops matching gives false assurance. Smoke-test, and audit quarterly.</li><li><strong>A constitution nobody can recite.</strong> 60 rules is a backlog, not a constitution. Cut.</li><li><strong>Governance docs that drift from reality.</strong> If a doc claims a control that isn&#x27;t enforced, the <code>control-coverage-matrix.md</code> must say so honestly. Green that lies is worse than red.</li><li><strong>Knowledge capture as theater.</strong> Notes that restate git history teach nothing. Capture the <em>non-obvious lesson</em> or capture nothing (explicitly).</li><li><strong>Self-approval of governance changes.</strong> The author&#x27;s context rationalizes its own edit. Spawn an independent Critic for governance-recursive changes — it&#x27;s the whole point of Layer 2 review.</li></ul>
+<hr>
+<h2 id="quick-reference-card">Quick reference card</h2>
+<table><thead><tr><th>I want to…</th><th>Go to</th></tr></thead><tbody><tr><td>Understand the model</td><td><code>README.md</code></td></tr><tr><td>Know what&#x27;s non-negotiable</td><td><code>core/constitution/inviolable-rules.md</code></td></tr><tr><td>Classify a task</td><td><code>core/process/task-classification.md</code></td></tr><tr><td>Know what blocks autonomously</td><td><code>core/constitution/autonomy-tiers.md</code> + <code>core/governance/change-control-tiers.md</code></td></tr><tr><td>Start/close a session right</td><td><code>enforcement/claude/skills/session-protocol.md</code></td></tr><tr><td>See what&#x27;s actually enforced</td><td><code>core/governance/control-coverage-matrix.md</code></td></tr><tr><td>Tune a hook</td><td><code>enforcement/hook-coverage-matrix.md</code> + the hook&#x27;s comments</td></tr><tr><td>Add a stack</td><td><code>adapters/README.md</code></td></tr><tr><td>Add a rule</td><td><code>core/templates/inviolable-rule-template.md</code></td></tr><tr><td>Change enforcement strength</td><td><code>.claude/hooks/lib/keel.env</code> (<code>KEEL_ENFORCEMENT_PHASE</code>)</td></tr></tbody></table>
+</article></body></html>

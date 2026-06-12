@@ -1,0 +1,80 @@
+# Keel — governance verification (server-side backstop for the in-session hooks).
+# Generic GitHub Actions; adapt syntax for your CI. Make this a REQUIRED status check.
+name: governance-verify
+
+on:
+  pull_request:
+    branches: ["{{DEFAULT_BRANCH}}"]
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # need history to diff against the base branch
+
+      - name: Compute changed files
+        id: diff
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=1
+          echo "files=$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
+
+      # --- 1. Delivery record present when production source changed ---------
+      - name: Delivery record check
+        run: |
+          CHANGED="${{ steps.diff.outputs.files }}"
+          src=false; deliv=false
+          for f in $CHANGED; do
+            case "$f" in
+              src/*|app/*|lib/*|pkg/*|internal/*|*/src/*)
+                case "$f" in *test*|docs/*|*.md) ;; *) src=true ;; esac ;;
+            esac
+            case "$f" in *delivery*|*handoff*|agent-outputs/*) deliv=true ;; esac
+          done
+          if $src && ! $deliv; then
+            echo "::error::Production source changed but no delivery record in the PR (IR-20 / DoD)."
+            exit 1
+          fi
+          echo "delivery check ok (src=$src deliv=$deliv)"
+
+      # --- 2. Governance-recursive changes carry a debate transcript --------
+      - name: Adversarial-review check
+        run: |
+          CHANGED="${{ steps.diff.outputs.files }}"
+          # Tune these globs to your governance surface (mirror KEEL_GOVERNANCE_GLOBS).
+          gov=false
+          for f in $CHANGED; do
+            case "$f" in
+              .claude/CLAUDE.md|.claude/hooks/*|.keel/core/constitution/*|.keel/core/governance/*|docs/decisions/*)
+                gov=true ;;
+            esac
+          done
+          if $gov; then
+            if ! ls agent-outputs/reviews/debate-transcripts/*.md >/dev/null 2>&1; then
+              echo "::error::Governance-recursive change without an adversarial-review debate transcript (review-framework.md Layer 2)."
+              exit 1
+            fi
+            echo "governance change has a debate transcript"
+          else
+            echo "no governance-recursive change"
+          fi
+
+      # --- 3. Secret scan (defense-in-depth; IR-19) -------------------------
+      - name: Secret scan
+        run: |
+          # Replace with your scanner of choice (gitleaks / detect-secrets / trufflehog).
+          if git grep -nIE '(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|password\s*=\s*["'"'"'][^"'"'"']{6,})' -- . ':!*.md' ':!.keel/*'; then
+            echo "::error::Possible secret committed (IR-19). Move it to a secrets manager."
+            exit 1
+          fi
+          echo "secret scan clean"
+
+  # --- 4. Stack adapter verify (tests/coverage/SAST/deps) -------------------
+  # Uncomment the adapter job(s) you installed; they live in adapters/<stack>/ci/.
+  # adapter-java:
+  #   uses: ./.github/workflows/java-verify.yml
+  # adapter-node:
+  #   uses: ./.github/workflows/node-verify.yml
+  # adapter-python:
+  #   uses: ./.github/workflows/python-verify.yml

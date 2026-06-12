@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keel — Agentic SDLC Governance Framework</title>
+<style>
+  :root{
+    --navy:#0b2545; --navy2:#13315c; --steel:#3a6ea5; --ice:#eef4fb;
+    --accent:#1d9a6c; --warn:#c9821a; --block:#c0392b; --ink:#1a2430;
+    --mut:#5b6b7b; --line:#dbe4ee; --card:#ffffff; --bg:#f5f8fc;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg)}
+  a{color:var(--steel);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:"SF Mono",ui-monospace,Menlo,Consolas,monospace;font-size:.86em;background:#eaf0f7;padding:.12em .4em;border-radius:4px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  /* hero */
+  header.hero{background:linear-gradient(160deg,var(--navy),var(--navy2) 70%,var(--steel));color:#fff;padding:64px 0 56px}
+  .hero h1{font-size:54px;margin:0 0 6px;letter-spacing:-1px;font-weight:800}
+  .hero .tag{font-size:21px;color:#cfe0f3;margin:0 0 26px;font-weight:500}
+  .hero p.lead{font-size:17px;max-width:720px;color:#e4eefb;margin:0 0 28px}
+  .pills{display:flex;flex-wrap:wrap;gap:10px}
+  .pill{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 13px;border-radius:999px;font-size:13px;color:#eaf2fc}
+  .kbox{margin-top:30px;background:#071a33;border:1px solid #1f3a5f;border-radius:10px;padding:16px 18px;font-family:"SF Mono",ui-monospace,Menlo,monospace;font-size:13.5px;color:#bfe3cf;overflow:auto}
+  .kbox .c{color:#7fa6cf}
+  /* sections */
+  section{padding:52px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:30px;margin:0 0 8px;letter-spacing:-.4px}
+  .sub{color:var(--mut);margin:0 0 28px;font-size:16px;max-width:760px}
+  .eyebrow{text-transform:uppercase;letter-spacing:.12em;font-size:12px;font-weight:700;color:var(--steel);margin:0 0 8px}
+  /* cards */
+  .grid{display:grid;gap:18px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;box-shadow:0 1px 2px rgba(11,37,69,.04)}
+  .card h3{margin:0 0 6px;font-size:18px}
+  .card .where{font-size:12.5px;color:var(--steel);font-family:ui-monospace,monospace;margin:0 0 10px}
+  .card p{margin:0;color:var(--mut);font-size:14.5px}
+  /* phases */
+  .phases{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .phase{padding:22px;border-right:1px solid var(--line)}
+  .phase:last-child{border-right:none}
+  .phase .n{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+  .phase.p1 .n{color:var(--steel)} .phase.p2 .n{color:var(--warn)} .phase.p3 .n{color:var(--block)}
+  .phase h4{margin:6px 0 8px;font-size:19px}
+  .phase p{margin:0;color:var(--mut);font-size:14px}
+  .phase .bar{height:5px;border-radius:3px;margin-top:14px}
+  .p1 .bar{background:var(--steel)} .p2 .bar{background:var(--warn)} .p3 .bar{background:var(--block)}
+  /* table */
+  table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--ice);font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--navy2)}
+  tr:last-child td{border-bottom:none}
+  td code{white-space:nowrap}
+  .tag-block{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px;background:#fbe9e7;color:var(--block)}
+  .when{font-family:ui-monospace,monospace;font-size:12px;color:var(--mut)}
+  /* layers diagram */
+  .stack{display:grid;gap:10px;max-width:760px}
+  .layer{border-radius:10px;padding:16px 20px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+  .layer small{opacity:.85;font-weight:400}
+  .l1{background:var(--navy)} .l2{background:var(--navy2)} .l3{background:var(--steel)} .l4{background:#5b8fc0}
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:14px}
+  ol.steps li{position:relative;padding:16px 18px 16px 56px;background:#fff;border:1px solid var(--line);border-radius:10px}
+  ol.steps li::before{counter-increment:s;content:counter(s);position:absolute;left:16px;top:16px;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+  ol.steps b{display:block;margin-bottom:2px}
+  footer{padding:36px 0;color:var(--mut);font-size:13px}
+  .note{background:#fff8ec;border:1px solid #f0d9a8;border-radius:10px;padding:16px 18px;font-size:14.5px;color:#7a5a18}
+  @media(max-width:780px){.g3,.g2,.phases{grid-template-columns:1fr}.hero h1{font-size:40px}.phase{border-right:none;border-bottom:1px solid var(--line)}}
+
+  .topnav{position:sticky;top:0;z-index:20;background:#071a33;color:#fff;display:flex;align-items:center;gap:18px;padding:0 22px;height:54px;flex-wrap:wrap}
+  .topnav .brand{color:#fff;font-weight:800;font-size:18px}
+  .topnav .navlinks{display:flex;gap:6px;flex-wrap:wrap}
+  .topnav .navlinks a{color:#cfe0f3;padding:6px 12px;border-radius:7px;font-size:14px}
+  .topnav .navlinks a:hover{background:rgba(255,255,255,.1)}
+  .topnav .navlinks a.active{background:var(--steel);color:#fff}
+</style>
+</head>
+<body>
+<nav class="topnav"><a class="brand" href="index.html">⚓ Keel</a><div class="navlinks"><a href="index.html" class="active">Overview</a><a href="readme.html">README</a><a href="implementation-guide.html">Implementation Guide</a><a href="coverage-matrix.html">Coverage Matrix</a></div></nav>
+
+
+<header class="hero">
+  <div class="wrap">
+    <h1>⚓ Keel</h1>
+    <p class="tag">Agentic SDLC Governance Framework</p>
+    <p class="lead">The structural backbone every delivery vessel needs. A technology-agnostic, deployable governance framework that makes disciplined, auditable, AI-assisted software delivery <strong>mechanical</strong> — not aspirational. Distilled from a production system and generalized to drop into any repo, any language, any agentic tool.</p>
+    <div class="pills">
+      <span class="pill">Constitution + Process</span>
+      <span class="pill">10 enforcement hooks</span>
+      <span class="pill">Java · Node · Python adapters</span>
+      <span class="pill">One-command installer</span>
+      <span class="pill">Phased rollout</span>
+      <span class="pill">v1.0.0</span>
+    </div>
+    <div class="kbox">
+<span class="c"># install into any repo in three commands</span><br>
+cp framework.config.example.yaml framework.config.yaml&nbsp;&nbsp;<span class="c"># set org, project, boundaries, stack</span><br>
+bash install.sh --target /path/to/repo --dry-run&nbsp;&nbsp;<span class="c"># preview</span><br>
+bash install.sh --target /path/to/repo&nbsp;&nbsp;<span class="c"># install (starts at phase 1: tracking)</span>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Why it exists</p>
+    <h2>Fast agents need mechanical guardrails</h2>
+    <p class="sub">AI coding agents have no institutional memory, no sense of “we already decided this,” and a bias toward output that <em>looks</em> right. Ungoverned, they ship code that compiles and quietly breaks what matters — tenant isolation, API stability, security posture, architectural boundaries. Governance-by-documentation fails because nobody re-reads the standards doc on edit #400.</p>
+    <div class="grid g3">
+      <div class="card"><h3>Mechanical, not advisory</h3><p>If a rule matters, a hook enforces it at the moment of action. Unenforced rules are aspirations — and the coverage matrix says so honestly.</p></div>
+      <div class="card"><h3>Tiered autonomy</h3><p>Most work auto-approves. Only high-blast-radius changes — schema, auth, breaking APIs, cross-boundary, frozen interfaces — block on a human.</p></div>
+      <div class="card"><h3>Compiled memory</h3><p>Every incident hardens the framework into a new rule or hook. Every non-obvious lesson becomes a knowledge note the next agent reads at session start.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Architecture</p>
+    <h2>Three layers, each usable on its own</h2>
+    <p class="sub">The constitution and process layers are pure documentation + templates — portable to any tool or none. The enforcement layer is where technology shows up; the default adapter targets Claude Code and the patterns port to git hooks or CI.</p>
+    <div class="stack">
+      <div class="layer l1"><span><strong>Constitution</strong> — the non-negotiables</span><small>inviolable rules · autonomy tiers · quality + security principles</small></div>
+      <div class="layer l2"><span><strong>Process</strong> — how work flows</span><small>SDLC gate · 6 session archetypes · task classification · DoR/DoD · waivers</small></div>
+      <div class="layer l3"><span><strong>Governance</strong> — decisions &amp; review</span><small>ADR process · adversarial review · knowledge mgmt · change-control tiers</small></div>
+      <div class="layer l4"><span><strong>Enforcement</strong> — the teeth</span><small>10 phase-aware hooks · 4 agent skills · CI backstop · stack adapters</small></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Adoption</p>
+    <h2>Phased rollout — built in</h2>
+    <p class="sub">Dropping every gate on a team at once breeds <code>--no-verify</code>. Every hook self-grades from one config line, so you phase enforcement in over ~4 weeks as the team internalizes each tier.</p>
+    <div class="phases">
+      <div class="phase p1"><div class="n">Phase 1</div><h4>Tracking</h4><p>Hooks log, never block. Make the gates visible and tune the heuristics with zero friction.</p><div class="bar"></div></div>
+      <div class="phase p2"><div class="n">Phase 2</div><h4>Soft gates</h4><p>Hooks warn loudly but still allow. Build the habit; measure how often each gate would fire.</p><div class="bar"></div></div>
+      <div class="phase p3"><div class="n">Phase 3</div><h4>Enforcing</h4><p>Hooks block (exit 2). Discipline is now structural. Turn on the required CI backstop.</p><div class="bar"></div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">The teeth</p>
+    <h2>10 enforcement hooks (shipped &amp; smoke-tested)</h2>
+    <p class="sub">Each blocks a specific class of violation in-session, with graded severity by phase. All ten were verified across phases 1–3 before release.</p>
+    <table>
+      <tr><th>Hook</th><th>When</th><th>Enforces</th></tr>
+      <tr><td><code>verify-spec</code></td><td class="when">pre-edit</td><td>Spec/quick-plan must exist before production code (IR-03)</td></tr>
+      <tr><td><code>verify-impact-analysis</code></td><td class="when">pre-edit</td><td>Fix branches need a quick-plan + impact analysis</td></tr>
+      <tr><td><code>verify-interface-stability</code></td><td class="when">pre-edit</td><td>Frozen interfaces can’t change without Tier-4 sign-off (IR-22)</td></tr>
+      <tr><td><code>check-file-length</code></td><td class="when">post-edit</td><td>Soft cap keeps units reviewable</td></tr>
+      <tr><td><code>verify-architecture-drift</code></td><td class="when">post-edit</td><td>No cross-boundary imports (IR-01)</td></tr>
+      <tr><td><code>verify-single-session</code></td><td class="when">prompt/edit/stop</td><td>One agent session per checkout</td></tr>
+      <tr><td><code>verify-status-claim</code></td><td class="when">close</td><td>“Tests pass / done” must show an actual test run</td></tr>
+      <tr><td><code>verify-api-contract</code></td><td class="when">close</td><td>Breaking contract changes are Tier-4 (IR-04/14)</td></tr>
+      <tr><td><code>verify-review-approval</code></td><td class="when">close</td><td>Governance changes need an adversarial-review transcript</td></tr>
+      <tr><td><code>verify-delivery</code></td><td class="when">close</td><td>Delivery record + knowledge capture at session close (IR-20)</td></tr>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Stack adapters</p>
+    <h2>Generic core, drop-in stacks</h2>
+    <p class="sub">The core never depends on a language. Adapters map it to concrete tooling — install what you use, delete the rest, copy one to add a new stack.</p>
+    <div class="grid g3">
+      <div class="card"><h3>Java / Spring</h3><p class="where">adapters/java-spring</p><p>ArchUnit boundary tests · JaCoCo + PIT · SpotBugs + FindSecBugs · OWASP dependency-check · Flyway standard.</p></div>
+      <div class="card"><h3>Node / TypeScript</h3><p class="where">adapters/node-typescript</p><p>ESLint + security plugin · Vitest · Playwright E2E · better-npm-audit · license-checker · import-boundaries.</p></div>
+      <div class="card"><h3>Python</h3><p class="where">adapters/python</p><p>ruff + black · pytest + coverage · bandit · pip-audit · mypy · import-linter contracts.</p></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">Getting started</p>
+    <h2>From zero to enforcing in ~4 weeks</h2>
+    <ol class="steps">
+      <li><b>Configure (30 min)</b>Copy <code>framework.config.yaml</code>, set org/project, your boundaries, autonomy thresholds, and which stack adapters you use.</li>
+      <li><b>Install at phase 1</b>Run the installer. It stamps the core to <code>.keel/</code>, hooks to <code>.claude/</code>, the adapters, and the CI workflow — all in tracking mode. Commit it as one PR.</li>
+      <li><b>Tune &amp; advance</b>Week 1 watch the gates track; tune the source/spec globs. Week 2–3 flip to soft (warn) and build habits. Week 4 flip to enforcing.</li>
+      <li><b>Wire the CI backstop</b>Make <code>governance-verify</code> a required status check so bypassed hooks still get caught at merge.</li>
+    </ol>
+    <p class="sub" style="margin-top:20px">Full detail in <code>IMPLEMENTATION_GUIDE.md</code> · mental model in <code>README.md</code> · the honest “what’s enforced” map in <code>core/governance/control-coverage-matrix.md</code>.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <p class="eyebrow">What's in the box</p>
+    <h2>52 files, one installer</h2>
+    <div class="grid g2">
+      <div class="card"><h3>core/ — agnostic heart</h3><p>constitution (rules, tiers, principles) · process (gate, archetypes, classification, DoR/DoD, waivers) · governance (ADR, review, knowledge, tiers, coverage matrix) · 6 templates.</p></div>
+      <div class="card"><h3>enforcement/ — Claude Code adapter</h3><p>CLAUDE.md master + settings.json · 10 hooks + shared lib · 4 skills (session-protocol, sdlc-gate, delivery-package, knowledge-capture) · hook-coverage matrix.</p></div>
+      <div class="card"><h3>adapters/ + ci/</h3><p>Java/Spring · Node/TS · Python stack standards &amp; CI snippets · a generic server-side governance-verify workflow.</p></div>
+      <div class="card"><h3>install.sh + guides</h3><p>token-substituting scaffolder with <code>--dry-run</code> · README · IMPLEMENTATION_GUIDE · ONE-PAGER · examples with hook smoke-tests.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <strong>Keel v1.0.0</strong> — Agentic SDLC Governance Framework · technology-agnostic · renameable via config.<br>
+    Generated as a deployable starter kit. See the repository docs to adopt, tune, and contribute back.
+  </div>
+</footer>
+
+</body>
+</html>
